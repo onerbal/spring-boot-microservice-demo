@@ -21,6 +21,12 @@ mvn clean package -DskipTests
 docker-compose up --build
 ```
 
+To access Eureka Server, go to url:
+http://localhost:9091/
+
+In order to access to UI, go to url:
+http://localhost:8081/
+
 License
 ----
 MIT
