@@ -12,8 +12,8 @@ services:
     - 9090:9090
     networks:
     - emp-network
-    volumes:
-    - config-repo:/var/lib/config-repo
+    #volumes:
+    #- config-repo:/var/lib/config-repo
   service-discovery:
     container_name: service-discovery
     build:
@@ -143,7 +143,7 @@ networks:
   emp-network:
     driver: bridge
 volumes:
-  config-repo:
-    external: true
+  #config-repo:
+  #  external: true
   mysql-data:
     external: true
