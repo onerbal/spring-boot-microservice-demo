@@ -1,0 +1,7 @@
+FROM alpine-jdk:base
+MAINTAINER javaonfly
+RUN apk --no-cache add netcat-openbsd
+COPY customer-service/target/customerservice-0.0.1-SNAPSHOT.jar /opt/lib/
+COPY customer-service/CustomerService-entrypoint.sh /opt/bin/CustomerService-entrypoint.sh
+RUN chmod 755 /opt/bin/CustomerService-entrypoint.sh
+EXPOSE 8080

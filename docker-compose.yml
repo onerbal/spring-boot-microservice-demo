@@ -1,0 +1,149 @@
+version: '2.2'
+services:
+  config-server:
+    container_name: config-server
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile-configserver
+    image: config-server:latest
+    expose:
+    - 9090
+    ports:
+    - 9090:9090
+    networks:
+    - emp-network
+    volumes:
+    - config-repo:/var/lib/config-repo
+  service-discovery:
+    container_name: service-discovery
+    build:
+      context: .
+      dockerfile: service-discovery/Dockerfile-servicediscovery
+    image: service-discovery:latest
+    expose:
+    - 9091
+    ports:
+    - 9091:9091
+    networks:
+    - emp-network
+  product-service:
+    #container_name: product-service
+    build:
+      context: .
+      dockerfile: product-service/Dockerfile-productservice
+    image: product-service:latest
+    environment:
+      SPRING_APPLICATION_JSON: '{"spring": {"cloud": {"config": {"uri": "http://config-server:9090"}}}}'
+    entrypoint: /opt/bin/ProductService-entrypoint.sh
+    expose:
+    - 8080
+    ports:
+    - 8080
+    networks:
+    - emp-network
+    links:
+    - config-server:config-server
+    - service-discovery:service-discovery
+    - mysql:mysql
+    depends_on:
+    - config-server
+    - service-discovery
+    - mysql
+    logging:
+      driver: json-file
+  order-service:
+    #container_name: order-service
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile-orderservice
+    image: order-service:latest
+    environment:
+      SPRING_APPLICATION_JSON: '{"spring": {"cloud": {"config": {"uri": "http://config-server:9090"}}}}'
+    entrypoint: /opt/bin/OrderService-entrypoint.sh
+    expose:
+    - 8080
+    ports:
+    - 8080
+    networks:
+    - emp-network
+    links:
+    - config-server:config-server
+    - service-discovery:service-discovery
+    - mysql:mysql
+    depends_on:
+    - config-server
+    - service-discovery
+    - mysql
+    logging:
+      driver: json-file
+  customer-service:
+    #container_name: customer-service
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile-customerservice
+    image: customer-service:latest
+    environment:
+      SPRING_APPLICATION_JSON: '{"spring": {"cloud": {"config": {"uri": "http://config-server:9090"}}}}'
+    entrypoint: /opt/bin/CustomerService-entrypoint.sh
+    expose:
+    - 8080
+    ports:
+    - 8080
+    networks:
+    - emp-network
+    links:
+    - config-server:config-server
+    - service-discovery:service-discovery
+    - mysql:mysql
+    depends_on:
+    - config-server
+    - service-discovery
+    - mysql
+    logging:
+      driver: json-file
+  dashboard-service:
+    #container_name: dashboard
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile-dashboard
+    image: dashboard:latest
+    environment:
+      SPRING_APPLICATION_JSON: '{"spring": {"cloud": {"config": {"uri": "http://config-server:9090"}}}}'
+    entrypoint: /opt/bin/dashboard-entrypoint.sh
+    expose:
+    - 8081
+    ports:
+    - 8081:8081
+    networks:
+    - emp-network
+    links:
+    - config-server:config-server
+    - service-discovery:service-discovery
+    depends_on:
+    - config-server
+    - service-discovery
+    logging:
+      driver: json-file
+  mysql:
+    build:
+      context: .
+      dockerfile: mysql-server/Dockerfile-mysql
+    image: mysql:latest
+    ports:
+    - 6603:3306
+    hostname: mysql-machine
+    expose:
+    - 6603
+    networks:
+    - emp-network
+    volumes:
+    - mysql-data:/var/lib/mysql
+    restart: always
+networks:
+  emp-network:
+    driver: bridge
+volumes:
+  config-repo:
+    external: true
+  mysql-data:
+    external: true
